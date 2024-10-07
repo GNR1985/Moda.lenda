@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Formulário de Entrega</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="moda.css">
+</head>
+<body>
+    <form id="contactForm">
+        <fieldset>
+            <h2>Endereço para entrega</h2>
+            <label for="nome">Nome: <span>*</span></label>
+            <input type="text" name="entry.nome" id="nome" required>
+            <label for="sobrenome">Sobrenome: <span>*</span></label>
+            <input type="text" name="entry.sobrenome" id="sobrenome" required>
+            <label for="endereco">Endereço: <span>*</span></label>
+            <input type="text" name="entry.endereco" id="endereco" required>
+            <label for="cep">CEP: <span>*</span></label>
+            <input type="number" name="entry.cep" id="cep" required>
+            <label for="pais">País: <span>*</span></label>
+            <select name="entry.pais" id="pais" required>
+                <option value="angola">Angola</option>
+                <option value="brasil">Brasil</option>
+                <option value="portugal">Portugal</option>
+                <option value="timor-leste">Timor-Leste</option>
+            </select>
+            <h2>Opção de Envio</h2>
+            <label for="expresso">
+                <input type="radio" name="envio" id="expresso" value="expresso" required> Expresso
+            </label>
+            <label for="normal">
+                <input type="radio" name="envio" id="normal" value="normal" required> Normal
+            </label>
+            <button type="submit">Enviar</button>
+			  <div id="successMessage" style="display: none; color: green; margin-top: 20px;">
+        PIX: 98599758
+    </div>
+        </fieldset>
+    </form>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "https://dadosformulario-d1265-default-rtdb.firebaseio.com/",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const contactFormRef = ref(database, 'contactForm');
+
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome').value;
+            const sobrenome = document.getElementById('sobrenome').value;
+            const endereco = document.getElementById('endereco').value;
+            const cep = document.getElementById('cep').value;
+            const pais = document.getElementById('pais').value;
+            const envio = document.querySelector('input[name="envio"]:checked').value;
+
+            // Captura os dados do carrinho da URL
+            const cartData = new URLSearchParams(window.location.search).get('cart');
+            const cartItems = JSON.parse(decodeURIComponent(cartData));
+
+            // Cria o objeto com todas as informações
+            const data = {
+                nome,
+                sobrenome,
+                endereco,
+                cep,
+                pais,
+                envio,
+                cartItems // Adiciona os itens do carrinho
+            };
+
+            // Envia os dados para o Firebase
+            push(contactFormRef, data)
+                .then(() => {
+                    // Exibe a mensagem de sucesso
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block'; // Torna a mensagem visível
+                    successMessage.textContent = 'PIX 98599758'; // Define o texto
+                    setTimeout(() => {
+                        window.location.href = 'slow.html'; // Redirecionar após 10 segundos
+                    }, 10000);
+                })
+                .catch((error) => {
+                    alert('Erro ao enviar o formulário: ' + error);
+                });
+        });
+    </script>
+</body>
+</html>
+</html>
